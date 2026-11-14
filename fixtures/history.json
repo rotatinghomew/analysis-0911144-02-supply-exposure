@@ -1,0 +1,68 @@
+{
+  "nodes": [
+    {
+      "id": "ore",
+      "capacity": 60
+    },
+    {
+      "id": "resin",
+      "capacity": 100
+    },
+    {
+      "id": "body",
+      "capacity": 100
+    },
+    {
+      "id": "seal",
+      "capacity": 100
+    },
+    {
+      "id": "unit",
+      "capacity": 100
+    }
+  ],
+  "edges": [
+    {
+      "parent": "body",
+      "child": "ore",
+      "group": "metal",
+      "units": 1,
+      "valid_from": 0
+    },
+    {
+      "parent": "seal",
+      "child": "resin",
+      "group": "polymer",
+      "units": 1,
+      "valid_from": 0
+    },
+    {
+      "parent": "unit",
+      "child": "body",
+      "group": "housing",
+      "units": 1,
+      "valid_from": 0
+    },
+    {
+      "parent": "unit",
+      "child": "seal",
+      "group": "gasket",
+      "units": 1,
+      "valid_from": 0
+    }
+  ],
+  "orders": [
+    {
+      "id": "o1",
+      "node": "unit",
+      "quantity": 40,
+      "due": 5
+    },
+    {
+      "id": "o2",
+      "node": "body",
+      "quantity": 35,
+      "due": 5
+    }
+  ]
+}
