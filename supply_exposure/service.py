@@ -3,6 +3,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 
 from .domain import records, summarize
+from .exposure import analyze
 from .repository import Conflict
 
 
@@ -39,7 +40,8 @@ def make_server(repository, host='127.0.0.1', port=0):
                 self.send_json(400, {'error': str(error)})
 
         def do_POST(self):
-            if urlsplit(self.path).path != '/imports':
+            path = urlsplit(self.path).path
+            if path not in ('/imports', '/exposure'):
                 return self.send_json(404, {'error': '接口不存在'})
             try:
                 length = int(self.headers.get('Content-Length', '0'))
@@ -48,11 +50,22 @@ def make_server(repository, host='127.0.0.1', port=0):
                 payload = json.loads(self.rfile.read(length))
                 if not isinstance(payload, dict):
                     raise ValueError('请求必须是对象')
-                result = repository.import_data(payload['data'], payload['request_key'])
-                self.send_json(200 if result['replayed'] else 201, result)
+                if path == '/imports':
+                    result = repository.import_data(payload['data'], payload['request_key'])
+                    return self.send_json(200 if result['replayed'] else 201, result)
+                revision = payload.get('revision')
+                if revision is not None and type(revision) is not int:
+                    raise ValueError('revision 必须为整数')
+                snapshot = repository.get(revision)
+                result = analyze(snapshot['data'], payload.get('scenarios'))
+                self.send_json(200, {'revision': snapshot['revision'], 'digest': snapshot['digest'], 'result': result})
+            except LookupError as error:
+                self.send_json(404, {'error': str(error)})
             except Conflict as error:
                 self.send_json(409, {'error': str(error)})
             except (ValueError, KeyError, TypeError, UnicodeError) as error:
                 self.send_json(400, {'error': str(error)})
+            except RuntimeError as error:
+                self.send_json(500, {'error': str(error)})
 
     return ThreadingHTTPServer((host, port), Handler)

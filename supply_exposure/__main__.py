@@ -19,6 +19,7 @@ def main():
     server_parser.add_argument('--load', type=Path)
     demo_parser = subcommands.add_parser('demo', help='运行本地资料往返演示')
     demo_parser.add_argument('--fixture', type=Path, default=Path('fixtures/demo.json'))
+    demo_parser.add_argument('--exposure', type=Path, default=Path('fixtures/exposure.json'))
     args = parser.parse_args()
     if args.command == 'serve':
         repository = Repository(args.database)
@@ -39,7 +40,12 @@ def main():
                 client = Client(f'http://127.0.0.1:{server.server_port}')
                 data = json.loads(args.fixture.read_text())
                 receipt = client.import_data(data, 'demo')
-                print(json.dumps({'import': receipt, 'summary': client.summary(receipt['revision'])}, ensure_ascii=False, indent=2))
+                output = {'import': receipt, 'summary': client.summary(receipt['revision'])}
+                if args.exposure.exists():
+                    payload = json.loads(args.exposure.read_text())
+                    exposure_receipt = client.import_data(payload['data'], 'demo-exposure')
+                    output['exposure'] = client.exposure(payload['scenarios'], exposure_receipt['revision'])
+                print(json.dumps(output, ensure_ascii=False, indent=2))
             finally:
                 server.shutdown()
                 worker.join()

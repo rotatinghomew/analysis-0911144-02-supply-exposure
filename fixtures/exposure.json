@@ -1,0 +1,41 @@
+{
+  "data": {
+    "nodes": [
+      {"id": "unit", "capacity": 90},
+      {"id": "housing", "capacity": 100},
+      {"id": "board", "capacity": 90},
+      {"id": "chip_main", "capacity": 40},
+      {"id": "chip_local", "capacity": 30},
+      {"id": "machining", "capacity": 50},
+      {"id": "machining_partner", "capacity": 30},
+      {"id": "alloy", "capacity": 100},
+      {"id": "jig", "capacity": 40},
+      {"id": "resin", "capacity": 80},
+      {"id": "resin_new", "capacity": 80}
+    ],
+    "edges": [
+      {"parent": "unit", "child": "housing", "group": "壳体", "units": 1, "valid_from": 0},
+      {"parent": "unit", "child": "board", "group": "控制", "units": 1, "valid_from": 0},
+      {"parent": "board", "child": "chip_main", "group": "芯片", "units": 1, "valid_from": 0},
+      {"parent": "board", "child": "chip_local", "group": "芯片", "units": 1, "valid_from": 0},
+      {"parent": "chip_local", "child": "machining", "group": "加工", "units": 1, "valid_from": 0},
+      {"parent": "housing", "child": "machining", "group": "加工", "units": 1, "valid_from": 0},
+      {"parent": "housing", "child": "machining_partner", "group": "加工", "units": 1, "valid_from": 0},
+      {"parent": "machining", "child": "alloy", "group": "材料", "units": 1, "valid_from": 0},
+      {"parent": "machining", "child": "jig", "group": "工装", "units": 1, "valid_from": 0},
+      {"parent": "jig", "child": "machining", "group": "加工服务", "units": 1, "valid_from": 0},
+      {"parent": "housing", "child": "resin", "group": "密封", "units": 1, "valid_from": 0},
+      {"parent": "housing", "child": "resin_new", "group": "密封", "units": 1, "valid_from": 12}
+    ],
+    "orders": [
+      {"id": "o1", "node": "unit", "quantity": 50, "due": 10},
+      {"id": "o2", "node": "board", "quantity": 30, "due": 8},
+      {"id": "o3", "node": "housing", "quantity": 20, "due": 12}
+    ]
+  },
+  "scenarios": [
+    {"name": "外协加工停供一周", "stop": ["machining_partner"], "start": 0, "end": 7, "horizon": 14},
+    {"name": "进口芯片停供", "stop": ["chip_main"], "start": 0, "end": 14, "horizon": 14},
+    {"name": "本土芯片来源未核实", "stop": [], "start": 0, "end": 1, "horizon": 14, "unknown": ["chip_local"]}
+  ]
+}

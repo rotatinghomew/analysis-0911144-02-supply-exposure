@@ -17,3 +17,9 @@ class Client:
 
     def summary(self, revision=None):
         return self.request('/summary' + ('' if revision is None else f'?revision={revision}'))
+
+    def exposure(self, scenarios, revision=None):
+        body = {'scenarios': scenarios}
+        if revision is not None:
+            body['revision'] = revision
+        return self.request('/exposure', body)
